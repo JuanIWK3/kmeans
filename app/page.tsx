@@ -121,7 +121,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center">
+      <div className="flex flex-wrap items-center justify-center mt-10">
         {clusters.map((cluster, id) => (
           <div key={id}>
             <h1>Cluster {id + 1}</h1>
