@@ -44,6 +44,13 @@ export default function Home() {
       return;
     }
 
+    // Se o arquivo não for csv, retorna
+    if (!file.name.endsWith(".csv")) {
+      alert("Please select a .csv file");
+
+      return;
+    }
+
     // Faz o parse do arquivo csv em um array de arrays vulgo number[][]
     Papa.parse(file, {
       header: true,
@@ -98,7 +105,7 @@ export default function Home() {
         {/* Input de arquivo */}
         <div className="flex flex-col gap-2">
           <h1 className="font-bold">Upload a file</h1>
-          <Input type="file" onChange={changeFile} />
+          <Input accept=".csv" type="file" onChange={changeFile} />
         </div>
 
         {/* Input de numero de clusters */}
@@ -114,24 +121,26 @@ export default function Home() {
         </div>
       </div>
 
-      {clusters.map((cluster, id) => (
-        <div key={id}>
-          <h1>Cluster {id + 1}</h1>
-          <Radar
-            className="max-h-[600px]"
-            data={{
-              labels: ["Rock", "Samba", "Pop", "Rap"],
-              datasets: [
-                {
-                  label: "# of Votes",
-                  data: cluster,
-                  backgroundColor: generateRandomColor(),
-                },
-              ],
-            }}
-          />
-        </div>
-      ))}
+      <div className="flex flex-wrap items-center justify-center">
+        {clusters.map((cluster, id) => (
+          <div key={id}>
+            <h1>Cluster {id + 1}</h1>
+            <Radar
+              className="max-h-[600px]"
+              data={{
+                labels: ["Rock", "Samba", "Pop", "Rap"],
+                datasets: [
+                  {
+                    label: "# of Votes",
+                    data: cluster,
+                    backgroundColor: generateRandomColor(),
+                  },
+                ],
+              }}
+            />
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
