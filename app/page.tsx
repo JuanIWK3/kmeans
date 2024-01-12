@@ -1,6 +1,6 @@
 "use client";
 
-import { kmeans } from "ml-kmeans";
+import { Input } from "@/components/ui/Input";
 import {
   Chart as ChartJS,
   Filler,
@@ -10,8 +10,9 @@ import {
   RadialLinearScale,
   Tooltip,
 } from "chart.js";
+import { kmeans } from "ml-kmeans";
 import Papa from "papaparse";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Radar } from "react-chartjs-2";
 
 ChartJS.register(
@@ -23,16 +24,10 @@ ChartJS.register(
   Legend
 );
 
-export interface Music {
-  id_usuario: number | null;
-  horas_ouvidas_rock?: number;
-  horas_ouvidas_samba?: number;
-  horas_ouvidas_pop?: number;
-  horas_ouvidas_rap?: number;
-}
-
 export default function Home() {
   const [clusters, setClusters] = useState<number[][]>([]);
+  const [clustersNumber, setClustersNumber] = useState<number>(4);
+  const [data, setData] = useState<any>();
 
   const changeFile = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.currentTarget.files?.[0];
@@ -44,10 +39,8 @@ export default function Home() {
     }
 
     Papa.parse(file, {
-      //Papa.parse('arquivo_inexistente.csv', { // Simular erro
-      //download: true,  // Simular erro
-      header: true, // Define se a primeira linha do CSV é um cabeçalho
-      dynamicTyping: true, // Converte automaticamente números e datas
+      header: true,
+      dynamicTyping: true,
       complete: (result: any) => {
         let resultData: number[][] = result.data;
         let values = resultData
@@ -56,30 +49,46 @@ export default function Home() {
           })
           .filter((user) => user.length === 4);
 
-        console.log(values);
-
-        let ans = kmeans(values, 8, {});
-
-        const info = ans
-          .computeInformation(values)
-          .map((cluster) => cluster.centroid);
-
-        console.log(info);
-
-        setClusters(info);
+        setData(values);
       },
     });
   };
 
+  useEffect(() => {
+    if (!data) return;
+    
+    console.log(data);
+
+    let ans = kmeans(data, clustersNumber, {});
+
+    const info = ans
+      .computeInformation(data)
+      .map((cluster) => cluster.centroid);
+
+    console.log(info);
+
+    setClusters(info);
+  }, [clustersNumber, data]);
+
   return (
     <main className="flex min-h-screen flex-col items-center p-24">
-      <input className="w-full" type="file" onChange={changeFile} />
+      <div className="flex flex-col gap-4 text-center">
+        <h1>Upload a file</h1>
+        <Input type="file" onChange={changeFile} />
+        <h1>Number of clusters</h1>
+        <Input
+          className="text-center"
+          type="number"
+          defaultValue={clustersNumber}
+          onBlur={(e) => setClustersNumber(+e.target.value)}
+        />
+      </div>
 
       {clusters.map((cluster, id) => (
         <div key={id}>
           <h1>Cluster {id + 1}</h1>
           <Radar
-            className="max-h-[400px]"
+            className="max-h-[600px]"
             data={{
               labels: ["Rock", "Samba", "Pop", "Rap"],
               datasets: [
